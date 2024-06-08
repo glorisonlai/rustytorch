@@ -165,13 +165,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pyto2rch"
-version = "0.1.0"
-dependencies = [
- "pyo3",
-]
-
-[[package]]
 name = "quote"
 version = "1.0.36"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -187,6 +180,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "469052894dcb553421e483e4209ee581a45100d31b4018de03e5a7ad86374a7e"
 dependencies = [
  "bitflags",
+]
+
+[[package]]
+name = "rustytorch"
+version = "0.1.0"
+dependencies = [
+ "pyo3",
 ]
 
 [[package]]

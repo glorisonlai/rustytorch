@@ -1,4 +1,4 @@
-import pyto2rch
+import rustytorch 
 from typing import TypeAlias, Union, TypeVar
 
 type NestedList[T] = list[Union[T, 'NestedList[T]']]
@@ -6,7 +6,7 @@ type NestedList[T] = list[Union[T, 'NestedList[T]']]
 class Tensor:
     ndim: int
     shape: list[int]
-    tensor: pyto2rch.Tensor
+    tensor: rustytorch.Tensor
 
     def __init__(self, data = None, device = "cpu") -> None:
         if not data is None:
@@ -14,7 +14,7 @@ class Tensor:
             ndim = len(flat_shape)
             self.ndim = ndim
             self.shape = flat_shape
-            self.tensor = pyto2rch.Tensor(flat_data, flat_shape, ndim, device)
+            self.tensor = rustytorch.Tensor(flat_data, flat_shape, ndim, device)
         else:
             self.tensor = None
             self.ndim = 0
@@ -52,7 +52,7 @@ class Tensor:
         """
         result_data = Tensor()
         ndim = len(new_shape)
-        result_data.tensor = pyto2rch.reshape_tensor(self.tensor, new_shape, ndim)
+        result_data.tensor = rustytorch.reshape_tensor(self.tensor, new_shape, ndim)
         result_data.ndim = ndim
         result_data.shape = new_shape
 
@@ -66,7 +66,7 @@ class Tensor:
             raise ValueError("Tensors must have the same shape")
 
         result_data = Tensor()
-        result_data.tensor = pyto2rch.add_tensor(self.tensor, other.tensor)
+        result_data.tensor = rustytorch.add_tensor(self.tensor, other.tensor)
         result_data.ndim = self.ndim
         result_data.shape = self.shape
 
