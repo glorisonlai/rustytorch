@@ -1,4 +1,4 @@
-# PyNorch
+# RustyNorch
 
 Recreating PyTorch from scratch (Rust + Python)
 
