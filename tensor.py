@@ -6,6 +6,7 @@ type NestedList[T] = list[Union[T, 'NestedList[T]']]
 class Tensor:
     ndim: int
     shape: list[int]
+    device: str
     tensor: rustytorch.Tensor
 
     def __init__(self, data = None, device = "cpu") -> None:
@@ -14,10 +15,12 @@ class Tensor:
             ndim = len(flat_shape)
             self.ndim = ndim
             self.shape = flat_shape
+            self.device = device
             self.tensor = rustytorch.Tensor(flat_data, flat_shape, ndim, device)
         else:
             self.tensor = None
             self.ndim = 0
+            self.device = device
             self.shape = []
 
     def flatten(self, nested_list: NestedList[float]) -> tuple[list[float], list[int]]:
@@ -72,8 +75,19 @@ class Tensor:
 
         return result_data
 
+    def to(self, device: str) -> 'Tensor':
+        """
+        Move the tensor to the given device
+
+        Returns itself
+        """
+        self.device = device
+        self.tensor.to_device(device)
+
+        return self 
+
 if __name__ == "__main__":
-    t1 = Tensor([[1, 2], [3, 4]])
-    t2 = Tensor([[5, 6], [7, 8]])
+    t1 = Tensor([[1, 2], [3, 4]]).to("opencl")
+    t2 = Tensor([[5, 6], [7, 8]], "opencl")
     t3 = t1 + t2
     print(t3[1,1])

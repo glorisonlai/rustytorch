@@ -48,6 +48,17 @@ impl Tensor {
         return tensor;
     }
 
+    pub fn to_device(&mut self, device: String) {
+        match device.as_str() {
+            "cpu" | "opencl" => {
+                self.device = device;
+            }
+            _ => {
+                panic!("Device not supported");
+            }
+        }
+    }
+
     pub fn get(&self, index: Vec<u32>) -> f32 {
         let mut offset = 0;
         for i in 0..self.ndim {
