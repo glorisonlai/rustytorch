@@ -1,4 +1,4 @@
-use super::cpu;
+use super::{cpu, opencl};
 use pyo3::prelude::*;
 
 #[pyclass]
@@ -6,13 +6,13 @@ pub struct Tensor {
     #[pyo3(get)]
     pub data: Vec<f32>,
     #[pyo3(get)]
-    pub strides: Vec<usize>,
+    pub strides: Vec<u32>,
     #[pyo3(get)]
-    pub shape: Vec<usize>,
+    pub shape: Vec<u32>,
     #[pyo3(get)]
-    pub ndim: usize,
+    pub ndim: u32,
     #[pyo3(get)]
-    pub size: usize,
+    pub size: u32,
     #[pyo3(get)]
     pub device: String,
 }
@@ -20,7 +20,7 @@ pub struct Tensor {
 #[pymethods]
 impl Tensor {
     #[new]
-    pub fn new(data: Vec<f32>, shape: Vec<usize>, ndim: usize, device: String) -> Tensor {
+    pub fn new(data: Vec<f32>, shape: Vec<u32>, ndim: u32, device: String) -> Tensor {
         let size = shape.iter().fold(1, |acc, x| acc * x);
 
         let strides = shape
@@ -34,7 +34,7 @@ impl Tensor {
             })
             .into_iter()
             .rev()
-            .collect::<Vec<usize>>();
+            .collect::<Vec<u32>>();
 
         let tensor = Tensor {
             data,
@@ -48,10 +48,10 @@ impl Tensor {
         return tensor;
     }
 
-    pub fn get(&self, index: Vec<usize>) -> f32 {
+    pub fn get(&self, index: Vec<u32>) -> f32 {
         let mut offset = 0;
         for i in 0..self.ndim {
-            offset += index[i] * self.strides[i];
+            offset += index[i as usize] * self.strides[i as usize];
         }
         return self.data[offset as usize];
     }
@@ -63,8 +63,23 @@ pub fn add_tensor(tensor_a: &Tensor, tensor_b: &Tensor) -> Tensor {
         panic!("Tensor dimensions must match");
     }
 
-    let mut result_data = vec![0.0; tensor_a.size];
+    if tensor_a.device != tensor_b.device {
+        panic!("Tensors must be on the same device");
+    }
 
+    let mut result_data = vec![0.0; tensor_a.size as usize];
+
+    match tensor_a.device.as_str() {
+        "cpu" => {
+            let _ = cpu::add_tensor_cpu(tensor_a, tensor_b, &mut result_data);
+        }
+        "opencl" => {
+            let _ = opencl::add_tensor(tensor_a, tensor_b, &mut result_data);
+        }
+        _ => {
+            panic!("Device not supported");
+        }
+    }
     let _ = cpu::add_tensor_cpu(tensor_a, tensor_b, &mut result_data);
 
     return Tensor::new(
@@ -76,16 +91,26 @@ pub fn add_tensor(tensor_a: &Tensor, tensor_b: &Tensor) -> Tensor {
 }
 
 #[pyfunction]
-pub fn reshape_tensor(tensor: &Tensor, shape: Vec<usize>, ndim: usize) -> Tensor {
+pub fn reshape_tensor(tensor: &Tensor, shape: Vec<u32>, ndim: u32) -> Tensor {
     let size = shape.iter().fold(1, |acc, x| acc * x);
 
     if size != tensor.size {
         panic!("Cannot reshape tensor. Total number of elements in new shape does not match the current size of the tensor.");
     }
 
-    let mut result_data = vec![0.0; size];
+    let mut result_data = vec![0.0; size as usize];
 
-    let _ = cpu::assign_tensor_cpu(tensor, &mut result_data);
+    match tensor.device.as_str() {
+        "cpu" => {
+            let _ = cpu::assign_tensor_cpu(tensor, &mut result_data);
+        }
+        "opencl" => {
+            let _ = opencl::assign_tensor(tensor, &mut result_data);
+        }
+        _ => {
+            panic!("Device not supported");
+        }
+    }
 
     return Tensor::new(result_data, shape, ndim, tensor.device.clone());
 }
@@ -99,12 +124,12 @@ mod tests {
         let data_a = vec![1.0, 2.0, 3.0, 4.0];
         let shape_a = vec![2, 2];
         let ndim_a = 2;
-        let tensor_a = Tensor::new(data_a, shape_a, ndim_a);
+        let tensor_a = Tensor::new(data_a, shape_a, ndim_a, String::from("cpu"));
 
         let data_b = vec![5.0, 6.0, 7.0, 8.0];
         let shape_b = vec![2, 2];
         let ndim_b = 2;
-        let tensor_b = Tensor::new(data_b, shape_b, ndim_b);
+        let tensor_b = Tensor::new(data_b, shape_b, ndim_b, String::from("cpu"));
 
         let tensor_c = add_tensor(&tensor_a, &tensor_b);
 
@@ -116,11 +141,11 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn test_bad_add_tensor() {
+    fn test_add_tensor_diff_dev() {
         let data_a = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
         let shape_a = vec![2, 2, 3];
         let ndim_a = 2;
-        let tensor_a = Tensor::new(data_a, shape_a, ndim_a, "cpu".to_string());
+        let tensor_a = Tensor::new(data_a, shape_a, ndim_a, "opencl".to_string());
 
         let data_b = vec![5.0, 6.0, 7.0, 8.0];
         let shape_b = vec![2, 2, 3, 4];

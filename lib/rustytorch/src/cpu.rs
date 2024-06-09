@@ -26,31 +26,31 @@ pub fn add_tensor_cpu(
     result_data: &mut Vec<f32>,
 ) -> TensorResult<()> {
     for i in 0..tensor_a.size {
-        result_data[i] = tensor_a.data[i] + tensor_b.data[i];
+        result_data[i as usize] = tensor_a.data[i as usize] + tensor_b.data[i as usize];
     }
 
     Ok(())
 }
 
-fn sub_tensor_cpu(
+pub fn sub_tensor_cpu(
     tensor_a: &tensor::Tensor,
     tensor_b: &tensor::Tensor,
     result_data: &mut Vec<f32>,
 ) -> TensorResult<()> {
     for i in 0..tensor_a.size {
-        result_data[i] = tensor_a.data[i] - tensor_b.data[i];
+        result_data[i as usize] = tensor_a.data[i as usize] - tensor_b.data[i as usize];
     }
 
     Ok(())
 }
 
-fn elementwise_mul_tensor_cpu(
+pub fn elementwise_mul_tensor_cpu(
     tensor_a: &tensor::Tensor,
     tensor_b: &tensor::Tensor,
     result_data: &mut Vec<f32>,
 ) -> TensorResult<()> {
     for i in 0..tensor_a.size {
-        result_data[i] = tensor_a.data[i] * tensor_b.data[i];
+        result_data[i as usize] = tensor_a.data[i as usize] * tensor_b.data[i as usize];
     }
 
     Ok(())
@@ -58,8 +58,60 @@ fn elementwise_mul_tensor_cpu(
 
 pub fn assign_tensor_cpu(tensor: &tensor::Tensor, result_data: &mut Vec<f32>) -> TensorResult<()> {
     for i in 0..tensor.size {
-        result_data[i] = tensor.data[i];
+        result_data[i as usize] = tensor.data[i as usize];
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_add_tensor_cpu() {
+        let tensor_a = tensor::Tensor::new(vec![1.0, 2.0, 3.0], vec![3], 1, "cpu".to_string());
+        let tensor_b = tensor::Tensor::new(vec![4.0, 5.0, 6.0], vec![3], 1, "cpu".to_string());
+
+        let mut result_data = vec![0.0; tensor_a.size as usize];
+
+        let _ = super::add_tensor_cpu(&tensor_a, &tensor_b, &mut result_data);
+
+        assert_eq!(result_data, vec![5.0, 7.0, 9.0]);
+    }
+
+    #[test]
+    fn test_sub_tensor_cpu() {
+        let tensor_a = tensor::Tensor::new(vec![6.0, 5.0, 4.0], vec![3], 1, "cpu".to_string());
+        let tensor_b = tensor::Tensor::new(vec![1.0, 2.0, 3.0], vec![3], 1, "cpu".to_string());
+
+        let mut result_data = vec![0.0; tensor_a.size as usize];
+
+        let _ = super::sub_tensor_cpu(&tensor_a, &tensor_b, &mut result_data);
+
+        assert_eq!(result_data, vec![5.0, 3.0, 1.0]);
+    }
+
+    #[test]
+    fn test_mul_tensor_cpu() {
+        let tensor_a = tensor::Tensor::new(vec![1.0, 2.0, 3.0], vec![3], 1, "cpu".to_string());
+        let tensor_b = tensor::Tensor::new(vec![4.0, 5.0, 6.0], vec![3], 1, "cpu".to_string());
+
+        let mut result_data = vec![0.0; tensor_a.size as usize];
+
+        let _ = super::elementwise_mul_tensor_cpu(&tensor_a, &tensor_b, &mut result_data);
+
+        assert_eq!(result_data, vec![4.0, 10.0, 18.0]);
+    }
+
+    #[test]
+    fn test_assign_tensor_cpu() {
+        let tensor = tensor::Tensor::new(vec![1.0, 2.0, 3.0], vec![3], 1, "cpu".to_string());
+
+        let mut result_data = vec![0.0; tensor.size as usize];
+
+        let _ = super::assign_tensor_cpu(&tensor, &mut result_data);
+
+        assert_eq!(result_data, vec![1.0, 2.0, 3.0]);
+    }
 }

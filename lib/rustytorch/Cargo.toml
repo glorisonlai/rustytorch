@@ -9,4 +9,5 @@ name = "rustytorch"
 crate-type = ["cdylib"]
 
 [dependencies]
+ocl = "0.19.7"
 pyo3 = "0.20.0"

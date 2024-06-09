@@ -1,5 +1,5 @@
 import rustytorch 
-from typing import TypeAlias, Union, TypeVar
+from typing import Union
 
 type NestedList[T] = list[Union[T, 'NestedList[T]']]
 

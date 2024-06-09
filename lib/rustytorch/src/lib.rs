@@ -1,4 +1,5 @@
 mod cpu;
+mod opencl;
 mod tensor;
 
 use pyo3::prelude::*;
