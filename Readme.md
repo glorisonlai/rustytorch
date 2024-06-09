@@ -11,7 +11,7 @@ This is a personal project for educational purposes only!
 
 Original idea credited to [@lucasdelimanogueira's PyNorch](https://github.com/lucasdelimanogueira/PyNorch)
 
-# 2 - Progress
+# Progress
 
 - [x] Tensor Ops
 - [ ] GPU Support
