@@ -4,19 +4,19 @@
 
 **RustyTorch** is a deep learning framework constructed using Rust and Python.
 
-This is a personal project for educational purposes only!
-
 The main objective of **RustyTorch** was to give a brief understanding of how a
 deep learning framework works internally, and to use Rust bindings in Python.
 
-Original idea credited to [@lucasdelimanogueira's PyNorch](https://github.com/lucasdelimanogueira/PyNorch)
+This is a personal project for educational purposes only!
 
-# 1 - About
+Original idea credited to [@lucasdelimanogueira's PyNorch](https://github.com/lucasdelimanogueira/PyNorch)
 
 # 2 - Progress
 
 - [x] Tensor Ops
-- [x] GPU Support
+- [ ] GPU Support
+  - [x] OpenCL
+  - [ ] CUDA
 - [ ] Autograd
 - [ ] Broadcasting
 - [ ] Memory Management
