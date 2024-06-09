@@ -17,6 +17,6 @@ Original idea credited to [@lucasdelimanogueira's PyNorch](https://github.com/lu
 - [ ] GPU Support
   - [x] OpenCL
   - [ ] CUDA
-- [ ] Autograd
+- [x] Autograd
 - [ ] Broadcasting
 - [ ] Memory Management

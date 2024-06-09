@@ -20,7 +20,7 @@ impl fmt::Display for TensorError {
     }
 }
 
-pub fn add_tensor_cpu(
+pub fn add_tensor(
     tensor_a: &tensor::Tensor,
     tensor_b: &tensor::Tensor,
     result_data: &mut Vec<f32>,
@@ -32,7 +32,7 @@ pub fn add_tensor_cpu(
     Ok(())
 }
 
-pub fn sub_tensor_cpu(
+pub fn sub_tensor(
     tensor_a: &tensor::Tensor,
     tensor_b: &tensor::Tensor,
     result_data: &mut Vec<f32>,
@@ -44,7 +44,7 @@ pub fn sub_tensor_cpu(
     Ok(())
 }
 
-pub fn elementwise_mul_tensor_cpu(
+pub fn elementwise_mul_tensor(
     tensor_a: &tensor::Tensor,
     tensor_b: &tensor::Tensor,
     result_data: &mut Vec<f32>,
@@ -56,10 +56,40 @@ pub fn elementwise_mul_tensor_cpu(
     Ok(())
 }
 
-pub fn assign_tensor_cpu(tensor: &tensor::Tensor, result_data: &mut Vec<f32>) -> TensorResult<()> {
+pub fn scalar_mul_tensor(
+    tensor: &tensor::Tensor,
+    scalar: f32,
+    result_data: &mut Vec<f32>,
+) -> TensorResult<()> {
+    for i in 0..tensor.size {
+        result_data[i as usize] = tensor.data[i as usize] * scalar;
+    }
+
+    Ok(())
+}
+
+pub fn sin_tensor(tensor: &tensor::Tensor, result_data: &mut Vec<f32>) {
+    for i in 0..tensor.size {
+        result_data[i as usize] = f32::sin(tensor.data[i as usize]);
+    }
+}
+
+pub fn cos_tensor(tensor: &tensor::Tensor, result_data: &mut Vec<f32>) {
+    for i in 0..tensor.size {
+        result_data[i as usize] = f32::cos(tensor.data[i as usize]);
+    }
+}
+
+pub fn assign_tensor(tensor: &tensor::Tensor, result_data: &mut Vec<f32>) -> TensorResult<()> {
     for i in 0..tensor.size {
         result_data[i as usize] = tensor.data[i as usize];
     }
+
+    Ok(())
+}
+
+pub fn fill_tensor(scalar: f32, result_data: &mut Vec<f32>) -> TensorResult<()> {
+    result_data.iter_mut().for_each(|x| *x = scalar);
 
     Ok(())
 }

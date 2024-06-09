@@ -128,6 +128,106 @@ pub fn elementwise_mul_tensor(
     Ok(())
 }
 
+pub fn scalar_mul_tensor(
+    tensor: &tensor::Tensor,
+    scalar: f32,
+    result_data: &mut Vec<f32>,
+) -> ocl::Result<()> {
+    let kernel = r#"
+        __kernel void vector_fill(__global float* vec, float scalar, __global float* vec_res) {
+            int i = get_global_id(0);
+
+            vec_res[i] = scalar * vec[i];
+        }
+    "#;
+
+    let dim_size = tensor.size;
+
+    let pro_que = ProQue::builder().src(kernel).dims(dim_size).build()?;
+
+    let data_buffer = create_buffer(&tensor.data, &pro_que)?;
+
+    let res_buffer = pro_que.create_buffer::<f32>()?;
+
+    let kernel = pro_que
+        .kernel_builder("vector_mul")
+        .arg(&data_buffer)
+        .arg(&res_buffer)
+        .build()?;
+
+    unsafe {
+        kernel.enq()?;
+    }
+
+    res_buffer.read(result_data).enq()?;
+
+    Ok(())
+}
+
+pub fn sin_tensor(tensor: &tensor::Tensor, result_data: &mut Vec<f32>) -> ocl::Result<()> {
+    let kernel = r#"
+        __kernel void vector_fill(__global float* vec, __global float* vec_res) {
+            int i = get_global_id(0);
+
+            vec_res[i] = sinf(vec[i]);
+        }
+    "#;
+
+    let dim_size = tensor.size;
+
+    let pro_que = ProQue::builder().src(kernel).dims(dim_size).build()?;
+
+    let data_buffer = create_buffer(&tensor.data, &pro_que)?;
+
+    let res_buffer = pro_que.create_buffer::<f32>()?;
+
+    let kernel = pro_que
+        .kernel_builder("vector_mul")
+        .arg(&data_buffer)
+        .arg(&res_buffer)
+        .build()?;
+
+    unsafe {
+        kernel.enq()?;
+    }
+
+    res_buffer.read(result_data).enq()?;
+
+    Ok(())
+}
+
+pub fn cos_tensor(tensor: &tensor::Tensor, result_data: &mut Vec<f32>) -> ocl::Result<()> {
+    let kernel = r#"
+        __kernel void vector_fill(__global float* vec, __global float* vec_res) {
+            int i = get_global_id(0);
+
+            vec_res[i] = cosf(vec[i]);
+        }
+    "#;
+
+    let dim_size = tensor.size;
+
+    let pro_que = ProQue::builder().src(kernel).dims(dim_size).build()?;
+
+    let data_buffer = create_buffer(&tensor.data, &pro_que)?;
+
+    let res_buffer = pro_que.create_buffer::<f32>()?;
+
+    let kernel = pro_que
+        .kernel_builder("vector_mul")
+        .arg(&data_buffer)
+        .arg(&res_buffer)
+        .build()?;
+
+    unsafe {
+        kernel.enq()?;
+    }
+
+    res_buffer.read(result_data).enq()?;
+
+    Ok(())
+}
+
 pub fn assign_tensor(tensor: &tensor::Tensor, result_data: &mut Vec<f32>) -> ocl::Result<()> {
     let kernel = r#"
         __kernel void vector_assign(__global float* vec, __global float* vec_res) {
@@ -148,6 +248,34 @@ pub fn assign_tensor(tensor: &tensor::Tensor, result_data: &mut Vec<f32>) -> ocl
     let kernel = pro_que
         .kernel_builder("vector_assign")
         .arg(&data_buffer)
+        .arg(&res_buffer)
+        .build()?;
+
+    unsafe {
+        kernel.enq()?;
+    }
+
+    res_buffer.read(result_data).enq()?;
+
+    Ok(())
+}
+
+pub fn fill_tensor(scalar: f32, result_data: &mut Vec<f32>) -> ocl::Result<()> {
+    let kernel = r#"
+        __kernel void vector_fill(float scalar, __global float* vec_res) {
+            vec_res[get_global_id(0)] = scalar;
+        }
+    "#;
+
+    let dim_size = result_data.len();
+
+    let pro_que = ProQue::builder().src(kernel).dims(dim_size).build()?;
+
+    let res_buffer = pro_que.create_buffer::<f32>()?;
+
+    let kernel = pro_que
+        .kernel_builder("vector_fill")
+        .arg(scalar)
         .arg(&res_buffer)
         .build()?;
 

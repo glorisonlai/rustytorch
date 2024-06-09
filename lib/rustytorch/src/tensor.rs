@@ -82,7 +82,7 @@ pub fn add_tensor(tensor_a: &Tensor, tensor_b: &Tensor) -> Tensor {
 
     match tensor_a.device.as_str() {
         "cpu" => {
-            let _ = cpu::add_tensor_cpu(tensor_a, tensor_b, &mut result_data);
+            let _ = cpu::add_tensor(tensor_a, tensor_b, &mut result_data);
         }
         "opencl" => {
             let _ = opencl::add_tensor(tensor_a, tensor_b, &mut result_data);
@@ -91,13 +91,148 @@ pub fn add_tensor(tensor_a: &Tensor, tensor_b: &Tensor) -> Tensor {
             panic!("Device not supported");
         }
     }
-    let _ = cpu::add_tensor_cpu(tensor_a, tensor_b, &mut result_data);
 
     return Tensor::new(
         result_data,
         tensor_a.shape.clone(),
         tensor_a.ndim,
         tensor_a.device.clone(),
+    );
+}
+
+#[pyfunction]
+pub fn sub_tensor(tensor_a: &Tensor, tensor_b: &Tensor) -> Tensor {
+    if (tensor_a.ndim != tensor_b.ndim) || (tensor_a.shape != tensor_b.shape) {
+        panic!("Tensor dimensions must match");
+    }
+
+    if tensor_a.device != tensor_b.device {
+        panic!("Tensors must be on the same device");
+    }
+
+    let mut result_data = vec![0.0; tensor_a.size as usize];
+
+    match tensor_a.device.as_str() {
+        "cpu" => {
+            let _ = cpu::sub_tensor(tensor_a, tensor_b, &mut result_data);
+        }
+        "opencl" => {
+            let _ = opencl::sub_tensor(tensor_a, tensor_b, &mut result_data);
+        }
+        _ => {
+            panic!("Device not supported");
+        }
+    }
+
+    return Tensor::new(
+        result_data,
+        tensor_a.shape.clone(),
+        tensor_a.ndim,
+        tensor_a.device.clone(),
+    );
+}
+
+#[pyfunction]
+pub fn mul_tensor(tensor_a: &Tensor, tensor_b: &Tensor) -> Tensor {
+    if (tensor_a.ndim != tensor_b.ndim) || (tensor_a.shape != tensor_b.shape) {
+        panic!("Tensor dimensions must match");
+    }
+
+    if tensor_a.device != tensor_b.device {
+        panic!("Tensors must be on the same device");
+    }
+
+    let mut result_data = vec![0.0; tensor_a.size as usize];
+
+    match tensor_a.device.as_str() {
+        "cpu" => {
+            let _ = cpu::elementwise_mul_tensor(tensor_a, tensor_b, &mut result_data);
+        }
+        "opencl" => {
+            let _ = opencl::elementwise_mul_tensor(tensor_a, tensor_b, &mut result_data);
+        }
+        _ => {
+            panic!("Device not supported");
+        }
+    }
+
+    return Tensor::new(
+        result_data,
+        tensor_a.shape.clone(),
+        tensor_a.ndim,
+        tensor_a.device.clone(),
+    );
+}
+
+#[pyfunction]
+pub fn mul_scalar(tensor: &Tensor, scalar: f32) -> Tensor {
+    let mut result_data = vec![0.0; tensor.size as usize];
+
+    match tensor.device.as_str() {
+        "cpu" => {
+            let _ = cpu::scalar_mul_tensor(tensor, scalar, &mut result_data);
+        }
+        "opencl" => {
+            let _ = opencl::scalar_mul_tensor(tensor, scalar, &mut result_data);
+        }
+        _ => {
+            panic!("Device not supported");
+        }
+    }
+
+    return Tensor::new(
+        result_data,
+        tensor.shape.clone(),
+        tensor.ndim,
+        tensor.device.clone(),
+    );
+}
+
+#[pyfunction]
+pub fn sin_tensor(tensor: &Tensor) -> Tensor {
+    let mut result_data = vec![0.0; tensor.size as usize];
+
+    match tensor.device.as_str() {
+        "cpu" => {
+            let _ = cpu::sin_tensor(tensor, &mut result_data);
+        }
+        "opencl" => {
+            let _ = opencl::sin_tensor(tensor, &mut result_data);
+        }
+        _ => {
+            panic!("Device not supported");
+        }
+    }
+
+    return Tensor::new(
+        result_data,
+        tensor.shape.clone(),
+        tensor.ndim,
+        tensor.device.clone(),
+    );
+}
+
+#[pyfunction]
+pub fn cos_tensor(tensor: &Tensor) -> Tensor {
+    let mut result_data = vec![0.0; tensor.size as usize];
+
+    match tensor.device.as_str() {
+        "cpu" => {
+            let _ = cpu::cos_tensor(tensor, &mut result_data);
+        }
+        "opencl" => {
+            let _ = opencl::cos_tensor(tensor, &mut result_data);
+        }
+        _ => {
+            panic!("Device not supported");
+        }
+    }
+
+    return Tensor::new(
+        result_data,
+        tensor.shape.clone(),
+        tensor.ndim,
+        tensor.device.clone(),
     );
 }
 
@@ -113,7 +248,7 @@ pub fn reshape_tensor(tensor: &Tensor, shape: Vec<u32>, ndim: u32) -> Tensor {
 
     match tensor.device.as_str() {
         "cpu" => {
-            let _ = cpu::assign_tensor_cpu(tensor, &mut result_data);
+            let _ = cpu::assign_tensor(tensor, &mut result_data);
         }
         "opencl" => {
             let _ = opencl::assign_tensor(tensor, &mut result_data);
@@ -124,6 +259,42 @@ pub fn reshape_tensor(tensor: &Tensor, shape: Vec<u32>, ndim: u32) -> Tensor {
     }
 
     return Tensor::new(result_data, shape, ndim, tensor.device.clone());
+}
+
+#[pyfunction]
+pub fn zero_tensor(tensor: &Tensor) -> Tensor {
+    let mut result_data = vec![0.0; tensor.size as usize];
+
+    return Tensor::new(
+        result_data,
+        tensor.shape.clone(),
+        tensor.ndim,
+        tensor.device.clone(),
+    );
+}
+
+#[pyfunction]
+pub fn one_tensor(tensor: &Tensor) -> Tensor {
+    let mut result_data = vec![0.0; tensor.size as usize];
+
+    match tensor.device.as_str() {
+        "cpu" => {
+            let _ = cpu::fill_tensor(1.0, &mut result_data);
+        }
+        "opencl" => {
+            let _ = opencl::fill_tensor(1.0, &mut result_data);
+        }
+        _ => {
+            panic!("Device not supported");
+        }
+    }
+
+    return Tensor::new(
+        result_data,
+        tensor.shape.clone(),
+        tensor.ndim,
+        tensor.device.clone(),
+    );
 }
 
 #[cfg(test)]
