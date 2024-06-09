@@ -13,7 +13,7 @@ class Tensor:
     grad: 'Tensor | None'
     grad_fn: BackwardFunction 
 
-    def __init__(self, data = None, device = "cpu") -> None:
+    def __init__(self, data = None, device = "cpu", requires_grad = False) -> None:
         if not data is None:
             flat_data, flat_shape = self.flatten(data)
             ndim = len(flat_shape)
@@ -21,7 +21,7 @@ class Tensor:
             self.shape = flat_shape
             self.device = device
             self.tensor = rustytorch.Tensor(flat_data, flat_shape, ndim, device)
-            self.requires_grad = False 
+            self.requires_grad = requires_grad 
             self.grad = None
             self.grad_fn = None
         else:
@@ -29,7 +29,7 @@ class Tensor:
             self.ndim = 0
             self.device = device
             self.shape = []
-            self.requires_grad = True 
+            self.requires_grad = False
             self.grad = None
             self.grad_fn = None
 
